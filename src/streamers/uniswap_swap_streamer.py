@@ -7,6 +7,7 @@ from eth_defi.uniswap_v3.deployment import fetch_deployment
 from eth_defi.uniswap_v3.pool import fetch_pool_details
 from eth_defi.uniswap_v3.constants import UNISWAP_V3_DEPLOYMENTS
 from confluent_kafka import Producer
+from typing import Optional
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -22,9 +23,12 @@ class UniswapSwapStreamer(EventStreamer):
                  web3: MultiProviderWeb3, 
                  reorg_monitor: ReorganisationMonitor, 
                  pool_address: str, 
-                 kafka_producer: Producer = None,
-                 sleep: int = 1):
-        super().__init__(web3, reorg_monitor, sleep)
+                 sleep: float,
+                 kafka_producer: Optional[Producer] = None,
+                 block_state_path: Optional[str] = None,
+                 initial_block_count: int = 10,
+                 stats_save_interval: float = 10.0):
+        super().__init__(web3, reorg_monitor, sleep, block_state_path, initial_block_count, stats_save_interval)
         
         self.pool_address = pool_address
         self.pool_details = fetch_pool_details(web3, self.pool_address)

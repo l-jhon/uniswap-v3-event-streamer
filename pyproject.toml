@@ -5,9 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "coloredlogs>=15.0.1",
     "confluent-kafka>=2.11.0",
+    "pandas>=2.3.0",
     "prometheus-client>=0.22.1",
     "psycopg-binary>=3.2.9",
+    "pyarrow>=20.0.0",
+    "pytest>=8.4.1",
     "sqlalchemy>=2.0.41",
     "web3-ethereum-defi>=0.26.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.2",
 ]

@@ -4,4 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "confluent-kafka>=2.11.0",
+    "prometheus-client>=0.22.1",
+    "psycopg-binary>=3.2.9",
+    "sqlalchemy>=2.0.41",
+    "web3-ethereum-defi>=0.26.1",
+]

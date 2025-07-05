@@ -3,8 +3,9 @@
 import logging
 import coloredlogs
 import os
+from dotenv import load_dotenv
 
-_logging_initialized = False
+load_dotenv()
 
 def setup_logging(level: str = None):
     """Configure logging globally."""

@@ -8,6 +8,8 @@ from eth_defi.provider.multi_provider import MultiProviderWeb3
 from eth_defi.event_reader.reorganisation_monitor import ReorganisationMonitor
 from eth_defi.event_reader.reorganisation_monitor import ChainReorganisationDetected
 from eth_defi.event_reader.csv_block_data_store import CSVDatasetBlockDataStore
+from eth_defi.event_reader.reader import read_events, LogResult
+from eth_defi.event_reader.filter import Filter
 
 from src.utils.logger import get_logger
 
@@ -24,6 +26,7 @@ class EventStreamer(ABC):
                  web3: MultiProviderWeb3, 
                  reorg_monitor: ReorganisationMonitor, 
                  sleep: float,
+                 event_filter: Filter,
                  block_state_path: Optional[str] = None,
                  initial_block_count: int = 10,
                  stats_save_interval: float = 10.0):
@@ -33,6 +36,7 @@ class EventStreamer(ABC):
             web3 (Web3): Web3 instance
             reorg_monitor (_type_): Reorg monitor instance
             sleep (float): Sleep time in seconds
+            event_filter (Filter): Event filter to use for fetching events
             block_state_path (Optional[str]): Path to save block state checkpoint. If None, no checkpointing is done.
             initial_block_count (int): Number of initial blocks to load if starting fresh
             stats_save_interval (float): How often to save stats and block state (in seconds)
@@ -43,6 +47,7 @@ class EventStreamer(ABC):
         self.total_reorgs = 0
         self.stats_save_interval = stats_save_interval
         self.next_stats_save = time.time() + stats_save_interval
+        self.event_filter = event_filter
         
         if block_state_path:
             self.block_store = CSVDatasetBlockDataStore(Path(block_state_path))
@@ -72,15 +77,28 @@ class EventStreamer(ABC):
             except Exception as e:
                 logger.error(f"Failed to save block state: {e}")
         
-    @abstractmethod
-    def fetch_events(self, from_block: int, to_block: int):
-        """Fetch events from the blockchain
+    def fetch_events(self, start_block: int, end_block: int):
+        """Fetch events from the blockchain using the configured filter
 
         Args:
-            from_block (int): Starting block number
-            to_block (int): Ending block number
+            start_block (int): Starting block number
+            end_block (int): Ending block number
         """
-        pass
+        if self.event_filter is None:
+            raise NotImplementedError("Subclasses must set self.event_filter or override fetch_events method")
+
+        logger.info(f"Fetching events from block {start_block} to {end_block}")
+
+        events = read_events(
+            web3=self.web3, 
+            filter=self.event_filter, 
+            start_block=start_block, 
+            end_block=end_block,
+            extract_timestamps=None,
+            reorg_mon=self.reorg_monitor
+        )
+        
+        return events
 
     def stream_events(self): 
         """Stream events from the blockchain using template method pattern
@@ -115,3 +133,23 @@ class EventStreamer(ABC):
                 logger.error(f"Unexpected error during event streaming: {e}")
 
             time.sleep(self.sleep)
+
+    @abstractmethod
+    def decode_event(self, event: LogResult) -> dict:
+        """Decode the event into a dictionary
+
+        Args:
+            event (LogResult): The event to decode
+        """
+        pass
+
+    @abstractmethod
+    def event_producer(self):
+        """Produce events to the Kafka topic
+        """
+        pass
+
+    @abstractmethod
+    def event_consumer(self):
+        """Consume events from the Kafka topic
+        """

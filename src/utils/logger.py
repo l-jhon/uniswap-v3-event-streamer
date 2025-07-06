@@ -3,9 +3,6 @@
 import logging
 import coloredlogs
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 def setup_logging(level: str = None):
     """Configure logging globally."""

@@ -24,7 +24,7 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     ports:
-      - "9092:9092"
+      - "29092:29092"
     depends_on:
       - zookeeper
     environment:
@@ -66,15 +66,19 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
 
-  app:
+  events-producer:
     build:
       context: ..
       dockerfile: devops/Dockerfile
     env_file:
       - ../.env
-    container_name: app
+    environment:
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+    container_name: events-producer
     ports:
       - "8000:8000"
+    volumes:
+      - ../checkpoints:/app/checkpoints:rw
     depends_on:
       - kafka
       - postgres

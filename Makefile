@@ -1,7 +1,7 @@
 
 .PHONY: build
 build:
-	docker build --platform linux/amd64 -f devops/Dockerfile -t 0x-uniswap-event-streamer .
+	docker build -f devops/Dockerfile -t 0x-uniswap-event-streamer .
 
 .PHONY: compose-up
 compose-up:

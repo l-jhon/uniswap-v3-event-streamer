@@ -84,9 +84,6 @@ class EventStreamer(ABC):
             start_block (int): Starting block number
             end_block (int): Ending block number
         """
-        if self.event_filter is None:
-            raise NotImplementedError("Subclasses must set self.event_filter or override fetch_events method")
-
         logger.info(f"Fetching events from block {start_block} to {end_block}")
 
         events = read_events(

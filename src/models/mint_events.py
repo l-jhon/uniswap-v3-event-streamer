@@ -1,13 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import (
     Column, Integer, String, DateTime, Numeric, Text, Index, 
-    BigInteger, Float, MetaData
+    BigInteger, Float
 )
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-metadata = MetaData()
+from src.models import Base
 
 
 class MintEvent(Base):
@@ -20,17 +17,17 @@ class MintEvent(Base):
     __tablename__ = 'mint_events'
     __table_args__ = (
         # Unique constraint to prevent duplicates - this is the natural key for blockchain events
-        Index('uq_block_tx_log', 'block_number', 'tx_hash', 'log_index', unique=True),
+        Index('uq_mint_block_tx_log', 'block_number', 'tx_hash', 'log_index', unique=True),
         # Indexes for common query patterns
-        Index('idx_block_number', 'block_number'),
-        Index('idx_tx_hash', 'tx_hash'),
-        Index('idx_pool_address', 'pool_contract_address'),
-        Index('idx_timestamp', 'timestamp'),
-        Index('idx_event_name', 'event_name'),
-        Index('idx_token0_address', 'token0_address'),
-        Index('idx_token1_address', 'token1_address'),
+        Index('idx_mint_block_number', 'block_number'),
+        Index('idx_mint_tx_hash', 'tx_hash'),
+        Index('idx_mint_pool_address', 'pool_contract_address'),
+        Index('idx_mint_timestamp', 'timestamp'),
+        Index('idx_mint_event_name', 'event_name'),
+        Index('idx_mint_token0_address', 'token0_address'),
+        Index('idx_mint_token1_address', 'token1_address'),
         # Composite index for efficient range queries
-        Index('idx_block_timestamp', 'block_number', 'timestamp'),
+        Index('idx_mint_block_timestamp', 'block_number', 'timestamp'),
     )
 
     # Primary key - using auto-incrementing ID for performance
@@ -75,6 +72,8 @@ class MintEvent(Base):
     
     # Record metadata
     record_timestamp = Column(DateTime, nullable=False, comment='Timestamp when this record was created')
+    insert_timestamp = Column(DateTime, nullable=False, comment='Timestamp when this record was inserted into the database', default=datetime.now(timezone.utc))
+    update_timestamp = Column(DateTime, nullable=False, comment='Timestamp when this record was last updated', default=datetime.now(timezone.utc))
 
     def __repr__(self):
         return (

@@ -1,11 +1,15 @@
 
 .PHONY: build
 build:
-	docker build -f devops/Dockerfile -t 0x-uniswap-event-streamer .
+	docker build --platform linux/amd64 -f devops/Dockerfile -t 0x-uniswap-event-streamer .
 
 .PHONY: compose-up
 compose-up:
-	docker-compose -f devops/docker-compose.yaml up -d
+	docker-compose --env-file .env -f devops/docker-compose.yaml up -d
+
+.PHONY: compose-rebuild
+compose-rebuild:
+	docker-compose --env-file .env -f devops/docker-compose.yaml up -d --build
 
 .PHONY: compose-down
 compose-down:
@@ -23,12 +27,13 @@ clean-up:
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  build          - Build Docker image"
-	@echo "  compose-up     - Start services with docker-compose"
-	@echo "  compose-down   - Stop services with docker-compose"
-	@echo "  compose-logs   - Show logs from docker-compose services"
-	@echo "  clean-up       - Complete cleanup (stop services, remove volumes, delete image)"
-	@echo "  help           - Show this help message"
+	@echo "  build           - Build Docker image"
+	@echo "  compose-up      - Start services with docker-compose"
+	@echo "  compose-rebuild - Start services with docker-compose (force rebuild)"
+	@echo "  compose-down    - Stop services with docker-compose"
+	@echo "  compose-logs    - Show logs from docker-compose services"
+	@echo "  clean-up        - Complete cleanup (stop services, remove volumes, delete image)"
+	@echo "  help            - Show this help message"
 
 # Default target
 .DEFAULT_GOAL := help

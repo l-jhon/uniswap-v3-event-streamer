@@ -141,6 +141,11 @@ class UniswapV3EventStreamer(EventStreamer):
             raw_event['event_name'] = raw_event['event'].event_name
             raw_event['record_timestamp'] = datetime.now(timezone.utc)
             del raw_event['event']
+            block_timestamp = decoded_event['timestamp'].replace(tzinfo=timezone.utc)
+            current_time = datetime.now(timezone.utc)
+            latency = (current_time - block_timestamp).total_seconds()
+            self.produced_events_counter.labels(event_name=raw_event['event_name']).inc()
+            self.produced_events_latency_gauge.labels(event_name=raw_event['event_name']).set(latency)
             self.kafka_producer.produce(
                 topic=self.kafka_topic,
                 value=json.dumps(

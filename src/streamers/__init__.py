@@ -1,3 +1,3 @@
-from .uniswap_swap_streamer import UniswapSwapStreamer
+from .uniswapv3_event_streamer import UniswapV3EventStreamer
 
-__all__ = ['UniswapSwapStreamer'] 
+__all__ = ['UniswapV3EventStreamer'] 

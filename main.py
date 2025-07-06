@@ -3,6 +3,7 @@ import argparse
 from dotenv import load_dotenv
 from prometheus_client import start_http_server
 from confluent_kafka import Producer, Consumer
+from typing import List
 
 from eth_defi.provider.multi_provider import create_multi_provider_web3
 from eth_defi.chain import (
@@ -14,8 +15,10 @@ from eth_defi.event_reader.reorganisation_monitor import JSONRPCReorganisationMo
 from eth_defi.event_reader.block_time import measure_block_time
 from eth_defi.provider.multi_provider import MultiProviderWeb3
 from prometheus_client import Counter
-from src import UniswapSwapStreamer
+from src import UniswapV3EventStreamer
+from src.utils.logger import get_logger
 
+logger = get_logger(__name__)
 
 def setup_web3() -> tuple[MultiProviderWeb3, Counter]:
     """Initialize Web3 with middleware."""
@@ -48,60 +51,69 @@ def setup_kafka(mode: str, event: str):
         return None, consumer
 
 
-def get_checkpoint_path(event: str) -> str:
+def get_checkpoint_path() -> str:
     """Return checkpoint file path (inside/outside Docker)."""
     base_path = "/app/checkpoints" if os.path.exists("/app/checkpoints") else "checkpoints"
-    return os.path.join(base_path, f"uni-v3-{event}-streamer-block-state.csv")
+    return os.path.join(base_path, f"uni-v3-event-streamer-block-state.csv")
 
 
 def run_mode(mode: str, event: str):
     """Run in producer or consumer mode."""
-    print(f"Running UniswapSwapStreamer in {mode.upper()} mode...")
+    logger.info(f"Running UniswapV3EventStreamer in {mode.upper()} mode for events: {event}...")
 
-    load_dotenv()
-    start_http_server(8000)
+    try:
+        load_dotenv()
+        start_http_server(8000)
 
-    web3, api_request_counter = setup_web3()
-    producer, consumer = setup_kafka(mode, event)
-    pool = os.getenv("POOL_ADDR")
-    if not pool:
-        raise ValueError("Missing POOL_ADDR")
+        web3, api_request_counter = setup_web3()
+        producer, consumer = setup_kafka(mode, event)
+        pool = os.getenv("POOL_ADDR")
+        if not pool:
+            raise ValueError("Missing POOL_ADDR")
 
-    reorg_monitor = JSONRPCReorganisationMonitor(web3, check_depth=6)
-    block_time = measure_block_time(web3)
+        reorg_monitor = JSONRPCReorganisationMonitor(web3, check_depth=6)
+        block_time = measure_block_time(web3)
+        
+        kafka_topic = f"uniswap-v3-events"
 
-    streamer = UniswapSwapStreamer(
-        web3=web3,
-        reorg_monitor=reorg_monitor,
-        pool_address=pool,
-        sleep=block_time,
-        kafka_topic=f"uniswap-v3-{event}",
-        kafka_producer=producer,
-        kafka_consumer=consumer,
-        block_state_path=get_checkpoint_path(event),
-        initial_block_count=10,
-        stats_save_interval=10.0,
-        api_request_counter=api_request_counter
-    )
+        streamer = UniswapV3EventStreamer(
+            web3=web3,
+            event_type=event,
+            reorg_monitor=reorg_monitor,
+            pool_address=[pool],
+            sleep=block_time,
+            kafka_topic=kafka_topic,
+            kafka_producer=producer,
+            kafka_consumer=consumer,
+            block_state_path=get_checkpoint_path(),
+            initial_block_count=10,
+            stats_save_interval=10.0,
+            api_request_counter=api_request_counter
+        )
 
-    if mode == "producer":
-        streamer.event_producer()
-    else:
-        streamer.event_consumer()
+        if mode == "producer":
+            streamer.event_producer()
+        else:
+            streamer.event_consumer()
+            
+    except Exception as e:
+        logger.error(f"Error in run_mode: {e}")
+        raise
 
 
 def main():
     parser = argparse.ArgumentParser(description="Uniswap V3 Event Streamer")
-    parser.add_argument("--mode", choices=["producer", "consumer"], help="Mode to run")
-    parser.add_argument("--event", choices=["swap", "mint", "burn"], help="Event name to stream")
+    parser.add_argument("--mode", choices=["producer", "consumer"], required=True, help="Mode to run")
+    parser.add_argument("--event", required=True, choices=["swap", "mint", "burn", "all"], 
+                       help="Event(s) to stream. Can be: 'swap', 'mint', 'burn', or 'all'")
     args = parser.parse_args()
 
     try:
         run_mode(args.mode, args.event)
     except KeyboardInterrupt:
-        print("Shutting down...")
+        logger.info("Shutting down...")
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
         exit(1)
 
 

@@ -10,6 +10,7 @@ from eth_defi.event_reader.reorganisation_monitor import ChainReorganisationDete
 from eth_defi.event_reader.csv_block_data_store import CSVDatasetBlockDataStore
 from eth_defi.event_reader.reader import read_events, LogResult
 from eth_defi.event_reader.filter import Filter
+from prometheus_client import Counter
 
 from src.utils.logger import get_logger
 
@@ -29,7 +30,8 @@ class EventStreamer(ABC):
                  event_filter: Filter,
                  block_state_path: Optional[str] = None,
                  initial_block_count: int = 10,
-                 stats_save_interval: float = 10.0):
+                 stats_save_interval: float = 10.0,
+                 api_request_counter: Optional[Counter] = None):
         """Initialize the event streamer
 
         Args:
@@ -40,6 +42,7 @@ class EventStreamer(ABC):
             block_state_path (Optional[str]): Path to save block state checkpoint. If None, no checkpointing is done.
             initial_block_count (int): Number of initial blocks to load if starting fresh
             stats_save_interval (float): How often to save stats and block state (in seconds)
+            api_request_counter (Counter): Counter for API requests
         """
         self.web3 = web3
         self.reorg_monitor = reorg_monitor
@@ -48,6 +51,7 @@ class EventStreamer(ABC):
         self.stats_save_interval = stats_save_interval
         self.next_stats_save = time.time() + stats_save_interval
         self.event_filter = event_filter
+        self.api_request_counter = api_request_counter
         
         if block_state_path:
             self.block_store = CSVDatasetBlockDataStore(Path(block_state_path))
@@ -119,6 +123,7 @@ class EventStreamer(ABC):
                     self._save_block_state()
                     logger.info("**STATS** Reorgs detected: %d, block headers buffered: %d", 
                                self.total_reorgs, len(self.reorg_monitor.block_map))
+                    logger.info(f"API requests: {self.api_request_counter['total']}")
                     self.next_stats_save = time.time() + self.stats_save_interval
 
             except ChainReorganisationDetected as e:

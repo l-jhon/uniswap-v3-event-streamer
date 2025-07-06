@@ -12,11 +12,12 @@ from eth_defi.chain import (
 )
 from eth_defi.event_reader.reorganisation_monitor import JSONRPCReorganisationMonitor
 from eth_defi.event_reader.block_time import measure_block_time
-
+from eth_defi.provider.multi_provider import MultiProviderWeb3
+from prometheus_client import Counter
 from src import UniswapSwapStreamer
 
 
-def setup_web3():
+def setup_web3() -> tuple[MultiProviderWeb3, Counter]:
     """Initialize Web3 with middleware."""
     rpc_url = os.getenv("JSON_RPC_URL")
     if not rpc_url:
@@ -25,9 +26,9 @@ def setup_web3():
     web3 = create_multi_provider_web3(rpc_url)
     install_chain_middleware(web3)
     install_retry_middleware(web3)
-    install_api_call_counter_middleware(web3)
+    api_request_counter = install_api_call_counter_middleware(web3)
 
-    return web3
+    return web3, api_request_counter
 
 
 def setup_kafka(mode: str, event: str):
@@ -60,7 +61,7 @@ def run_mode(mode: str, event: str):
     load_dotenv()
     start_http_server(8000)
 
-    web3 = setup_web3()
+    web3, api_request_counter = setup_web3()
     producer, consumer = setup_kafka(mode, event)
     pool = os.getenv("POOL_ADDR")
     if not pool:
@@ -77,9 +78,10 @@ def run_mode(mode: str, event: str):
         kafka_topic=f"uniswap-v3-{event}",
         kafka_producer=producer,
         kafka_consumer=consumer,
-        block_state_path=get_checkpoint_path(),
+        block_state_path=get_checkpoint_path(event),
         initial_block_count=10,
-        stats_save_interval=10.0
+        stats_save_interval=10.0,
+        api_request_counter=api_request_counter
     )
 
     if mode == "producer":
@@ -95,7 +97,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        run_mode(args.mode)
+        run_mode(args.mode, args.event)
     except KeyboardInterrupt:
         print("Shutting down...")
     except Exception as e:

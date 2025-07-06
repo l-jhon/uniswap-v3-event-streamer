@@ -13,6 +13,7 @@ from typing import Optional
 from src.utils.logger import get_logger
 from eth_defi.uniswap_v3.events import decode_swap
 from src.utils.datetime_encoder import DateTimeEncoder
+from prometheus_client import Counter
 
 logger = get_logger(__name__)
 class UniswapSwapStreamer(EventStreamer):
@@ -32,7 +33,8 @@ class UniswapSwapStreamer(EventStreamer):
                  kafka_consumer: Optional[Consumer] = None,
                  block_state_path: Optional[str] = None,
                  initial_block_count: int = 10,
-                 stats_save_interval: float = 10.0):
+                 stats_save_interval: float = 10.0,
+                 api_request_counter: Optional[Counter] = None):
         
         self.pool_address = pool_address
         self.pool_details = fetch_pool_details(web3, self.pool_address)
@@ -53,7 +55,8 @@ class UniswapSwapStreamer(EventStreamer):
             event_filter=self.event_filter,
             block_state_path=block_state_path, 
             initial_block_count=initial_block_count, 
-            stats_save_interval=stats_save_interval
+            stats_save_interval=stats_save_interval,
+            api_request_counter=api_request_counter
         )
         self.kafka_topic = kafka_topic
         self.kafka_producer = kafka_producer
@@ -111,4 +114,43 @@ class UniswapSwapStreamer(EventStreamer):
     def event_consumer(self):
         """Consume events from the Kafka topic
         """
-        pass
+        if self.kafka_consumer is None:
+            raise ValueError("Kafka consumer is not set")
+        
+        # Subscribe to the topic
+        self.kafka_consumer.subscribe([self.kafka_topic])
+        
+        logger.info(f"Starting to consume events from topic: {self.kafka_topic}")
+        
+        try:
+            while True:
+                # Poll for messages
+                msg = self.kafka_consumer.poll(1.0)
+                
+                if msg is None:
+                    continue
+                
+                if msg.error():
+                    logger.error(f"Consumer error: {msg.error()}")
+                    continue
+                
+                try:
+                    # Parse the message
+                    event_data = json.loads(msg.value().decode('utf-8'))
+                    
+                    # Log the consumed event
+                    logger.info(f"Consumed event from topic {self.kafka_topic}:")
+                    logger.info(f"  Raw event: {event_data.get('raw_event', {})}")
+                    logger.info(f"  Decoded event: {event_data.get('decoded_event', {})}")
+                    
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to decode message: {e}")
+                except Exception as e:
+                    logger.error(f"Error processing message: {e}")
+                    
+        except KeyboardInterrupt:
+            logger.info("Consumer interrupted, shutting down...")
+        finally:
+            # Close the consumer
+            self.kafka_consumer.close()
+            logger.info("Consumer closed")

@@ -10,7 +10,7 @@ from eth_defi.event_reader.reorganisation_monitor import ChainReorganisationDete
 from eth_defi.event_reader.csv_block_data_store import CSVDatasetBlockDataStore
 from eth_defi.event_reader.reader import read_events, LogResult
 from eth_defi.event_reader.filter import Filter
-from prometheus_client import Counter
+from prometheus_client import Counter, Gauge
 
 from src.utils.logger import get_logger
 
@@ -53,6 +53,38 @@ class EventStreamer(ABC):
         self.event_filter = event_filter
         self.api_request_counter = api_request_counter
         
+        # Get chain ID for metrics to be used in Prometheus metrics
+        self.chain_id = self._get_chain_id()
+        
+        # Initialize Prometheus metrics
+        self.reorgs_detected_counter = Counter(
+            name='chain_reorganizations_total',
+            documentation='Total number of blockchain chain reorganizations (forks) detected since startup',
+            labelnames=['chain_id']
+        )
+        self.block_headers_buffered_gauge = Gauge(
+            name='block_headers_buffered',
+            documentation='Current number of block headers buffered in memory for reorg detection',
+            labelnames=['chain_id']
+        )
+        self.api_requests_total_gauge = Gauge(
+            name='api_requests_total',
+            documentation='Total number of JSON-RPC API requests made to the blockchain node',
+            labelnames=['chain_id']
+        )
+
+        self.produced_events_counter = Counter(
+            name="produced_events_total",
+            documentation="Total number of events produced to Kafka",
+            labelnames=["event_name"]
+        )
+
+        self.produced_events_latency_gauge = Gauge(
+            name="produced_events_latency",
+            documentation="Latency of events produced to Kafka",
+            labelnames=["event_name"]
+        )
+        
         if block_state_path:
             self.block_store = CSVDatasetBlockDataStore(Path(block_state_path))
             self._initialize_block_state(initial_block_count)
@@ -60,6 +92,25 @@ class EventStreamer(ABC):
             self.block_store = None
             logger.info(f"Block state checkpointing disabled. Initializing reorg monitor with {initial_block_count} current blocks.")
             self.reorg_monitor.load_initial_block_headers(initial_block_count, tqdm=tqdm)
+    
+    def _get_chain_id(self) -> str:
+        """Get the chain ID for metrics labeling"""
+        try:
+            chain_id = self.web3.eth.chain_id
+            chain_names = {
+                1: 'ethereum',
+                5: 'goerli',
+                11155111: 'sepolia',
+                137: 'polygon',
+                42161: 'arbitrum',
+                10: 'optimism',
+                56: 'bsc',
+                43114: 'avalanche'
+            }
+            return chain_names.get(chain_id, f'chain_{chain_id}')
+        except Exception as e:
+            logger.warning(f"Could not determine chain ID: {e}, using 'unknown'")
+            return 'unknown'
         
     def _initialize_block_state(self, initial_block_count: int):
         """Initialize block state from checkpoint or fresh start"""
@@ -121,14 +172,23 @@ class EventStreamer(ABC):
 
                 if time.time() > self.next_stats_save:
                     self._save_block_state()
-                    logger.info("**STATS** Reorgs detected: %d, block headers buffered: %d", 
-                               self.total_reorgs, len(self.reorg_monitor.block_map))
-                    logger.info(f"API requests: {self.api_request_counter['total']}")
+                    
+                    self.block_headers_buffered_gauge.labels(chain_id=self.chain_id).set(len(self.reorg_monitor.block_map))
+                    
+                    if self.api_request_counter:
+                        api_requests_total = self.api_request_counter['total']
+                        self.api_requests_total_gauge.labels(chain_id=self.chain_id).set(api_requests_total)
+                        logger.info(f"Reorgs detected: {self.total_reorgs}, block headers buffered: {len(self.reorg_monitor.block_map)}, API requests: {api_requests_total}")
+                    else:
+                        logger.info(f"Reorgs detected: {self.total_reorgs}, block headers buffered: {len(self.reorg_monitor.block_map)}")
+                    
                     self.next_stats_save = time.time() + self.stats_save_interval
 
             except ChainReorganisationDetected as e:
                 # reorg_monitor.update_chain() will detect the fork and purge bad state automatically
                 self.total_reorgs += 1
+                # Increment Prometheus counter for reorg detection
+                self.reorgs_detected_counter.labels(chain_id=self.chain_id).inc()
                 logger.warning("Chain reorg event raised: %s, we have now detected %d chain reorganisations.", e, self.total_reorgs)
                 
             except Exception as e:

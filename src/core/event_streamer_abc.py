@@ -151,7 +151,3 @@ class EventStreamer(ABC):
         """
         pass
 
-    @abstractmethod
-    def event_consumer(self):
-        """Consume events from the Kafka topic
-        """

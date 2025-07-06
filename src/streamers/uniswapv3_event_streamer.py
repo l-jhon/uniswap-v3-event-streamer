@@ -31,12 +31,11 @@ class UniswapV3EventStreamer(EventStreamer):
                  sleep: float,
                  kafka_topic: str,
                  kafka_producer: Optional[Producer] = None,
-                 kafka_consumer: Optional[Consumer] = None,
                  block_state_path: Optional[str] = None,
                  initial_block_count: int = 10,
                  stats_save_interval: float = 10.0,
                  api_request_counter: Optional[Counter] = None):
-        """Initialize the UniswapSwapStreamer
+        """Initialize the UniswapV3EventStreamer
 
         Args:
             web3 (MultiProviderWeb3): Web3 instance
@@ -46,7 +45,6 @@ class UniswapV3EventStreamer(EventStreamer):
             sleep (float): Sleep time in seconds
             kafka_topic (str): Kafka topic to produce events to
             kafka_producer (Optional[Producer]): Kafka producer instance
-            kafka_consumer (Optional[Consumer]): Kafka consumer instance
             block_state_path (Optional[str]): Path to save block state checkpoint
             initial_block_count (int): Number of initial blocks to load if starting fresh
             stats_save_interval (float): How often to save stats and block state (in seconds)
@@ -89,7 +87,6 @@ class UniswapV3EventStreamer(EventStreamer):
         )
         self.kafka_topic = kafka_topic
         self.kafka_producer = kafka_producer
-        self.kafka_consumer = kafka_consumer
     
         logger.info(f"UniswapV3EventStreamer initialized for pool: {self.pool_address}")
 
@@ -156,46 +153,3 @@ class UniswapV3EventStreamer(EventStreamer):
             )
             self.kafka_producer.flush()
 
-    def event_consumer(self):
-        """Consume events from the Kafka topic
-        """
-        if self.kafka_consumer is None:
-            raise ValueError("Kafka consumer is not set")
-        
-        # Subscribe to the topic
-        self.kafka_consumer.subscribe([self.kafka_topic])
-        
-        logger.info(f"Starting to consume events from topic: {self.kafka_topic}")
-        
-        try:
-            while True:
-                # Poll for messages
-                msg = self.kafka_consumer.poll(1.0)
-                
-                if msg is None:
-                    continue
-                
-                if msg.error():
-                    logger.error(f"Consumer error: {msg.error()}")
-                    continue
-                
-                try:
-                    # Parse the message
-                    event_data = json.loads(msg.value().decode('utf-8'))
-                    
-                    # Log the consumed event
-                    logger.info(f"Consumed event from topic {self.kafka_topic}:")
-                    logger.info(f"  Raw event: {event_data.get('raw_event', {})}")
-                    logger.info(f"  Decoded event: {event_data.get('decoded_event', {})}")
-                    
-                except json.JSONDecodeError as e:
-                    logger.error(f"Failed to decode message: {e}")
-                except Exception as e:
-                    logger.error(f"Error processing message: {e}")
-                    
-        except KeyboardInterrupt:
-            logger.info("Consumer interrupted, shutting down...")
-        finally:
-            # Close the consumer
-            self.kafka_consumer.close()
-            logger.info("Consumer closed")

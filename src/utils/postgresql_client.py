@@ -1,10 +1,9 @@
 import os
+from datetime import datetime, timezone
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.models import Base
-from src.models import SwapEvent
-from src.models import MintEvent
-from src.models import BurnEvent
+from src.models import Base, generate_event_uuid
+from src.models import SwapEvent, MintEvent, BurnEvent
 
 class PostgresClient:
     def __init__(self):
@@ -41,6 +40,15 @@ class PostgresClient:
             The merged event instance
         """
         session = self.get_session()
+
+        if event.id is None:
+            event.id = generate_event_uuid(
+                block_number=event.block_number,
+                tx_hash=event.tx_hash,
+                log_index=event.log_index
+            )
+            event.update_timestamp = datetime.now(timezone.utc)
+
         try:
             merged_event = session.merge(event)
             session.commit()

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import (
     Column, Integer, String, DateTime, Numeric, Text, Index, 
-    BigInteger, Float
+    BigInteger, Float, UUID
 )
 from src.models import Base
 
@@ -31,7 +31,7 @@ class BurnEvent(Base):
     )
 
     # Primary key - using auto-incrementing ID for performance
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, unique=True, nullable=False)
     
     # Block and transaction information
     block_number = Column(BigInteger, nullable=False, comment='Block number where the event occurred')
@@ -131,48 +131,3 @@ class BurnEvent(Base):
                 data[field] = Decimal(data[field])
         
         return cls(**data)
-
-    def get_burn_value_usd(self, token0_price_usd: float = None, token1_price_usd: float = None):
-        """
-        Calculate the USD value of the burned liquidity.
-        
-        Args:
-            token0_price_usd: Price of token0 in USD
-            token1_price_usd: Price of token1 in USD
-            
-        Returns:
-            float: Total USD value of burned liquidity, or None if prices not provided
-        """
-        if token0_price_usd is None or token1_price_usd is None:
-            return None
-        
-        # Convert amounts to human-readable format using decimals
-        token0_amount = float(self.amount0) / (10 ** (self.token0_decimals or 0))
-        token1_amount = float(self.amount1) / (10 ** (self.token1_decimals or 0))
-        
-        # Calculate USD values
-        token0_value = token0_amount * token0_price_usd
-        token1_value = token1_amount * token1_price_usd
-        
-        return token0_value + token1_value
-
-    def get_position_range(self):
-        """
-        Get the price range of the burned position.
-        
-        Returns:
-            tuple: (lower_price, upper_price) in human-readable format
-        """
-        # This is a simplified calculation - in practice you'd use Uniswap's tick math
-        # For now, we'll return the tick values
-        return self.tick_lower, self.tick_upper
-
-    def is_partial_burn(self):
-        """
-        Determine if this is a partial burn (some liquidity remains).
-        This would require additional context about the position's total liquidity.
-        
-        Returns:
-            bool: True if likely a partial burn (amount0 or amount1 is 0)
-        """
-        return self.amount0 == 0 or self.amount1 == 0

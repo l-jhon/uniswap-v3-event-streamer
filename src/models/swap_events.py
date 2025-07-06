@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import (
     Column, Integer, String, DateTime, Numeric, Text, Index, 
-    BigInteger, Float
+    BigInteger, Float, UUID
 )
 from src.models import Base
 
@@ -30,7 +30,7 @@ class SwapEvent(Base):
     )
 
     # Primary key - using auto-incrementing ID for performance
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, unique=True, nullable=False)
     
     # Block and transaction information
     block_number = Column(BigInteger, nullable=False, comment='Block number where the event occurred')

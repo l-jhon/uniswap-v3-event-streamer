@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime, timezone
 from src import EventStreamer
 from eth_defi.event_reader.reorganisation_monitor import ReorganisationMonitor
 from eth_defi.provider.multi_provider import MultiProviderWeb3
@@ -8,7 +8,7 @@ from eth_defi.uniswap_v3.deployment import fetch_deployment
 from eth_defi.uniswap_v3.pool import fetch_pool_details
 from eth_defi.uniswap_v3.constants import UNISWAP_V3_DEPLOYMENTS
 from eth_defi.event_reader.logresult import LogResult
-from confluent_kafka import Producer, Consumer
+from confluent_kafka import Producer
 from typing import List, Optional
 from src.utils.logger import get_logger
 from eth_defi.uniswap_v3.events import decode_swap, decode_mint, decode_burn
@@ -121,7 +121,7 @@ class UniswapV3EventStreamer(EventStreamer):
             decoded_event["token1_name"] = pool_details.token1.name
             decoded_event["token0_total_supply"] = pool_details.token0.total_supply 
             decoded_event["token1_total_supply"] = pool_details.token1.total_supply
-            decoded_event["record_timestamp"] = datetime.datetime.now(datetime.timezone.utc)
+            decoded_event["record_timestamp"] = datetime.now(timezone.utc)
 
             return decoded_event
         
@@ -139,7 +139,7 @@ class UniswapV3EventStreamer(EventStreamer):
             logger.info(f"Event received: {raw_event['event'].event_name}")
             decoded_event = self.decode_event(raw_event)
             raw_event['event_name'] = raw_event['event'].event_name
-            raw_event['record_timestamp'] = datetime.datetime.now(datetime.timezone.utc)
+            raw_event['record_timestamp'] = datetime.now(timezone.utc)
             del raw_event['event']
             self.kafka_producer.produce(
                 topic=self.kafka_topic,

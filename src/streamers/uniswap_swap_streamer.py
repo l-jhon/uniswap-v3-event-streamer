@@ -12,7 +12,7 @@ from confluent_kafka import Producer, Consumer
 from typing import Optional
 from src.utils.logger import get_logger
 from eth_defi.uniswap_v3.events import decode_swap
-from src.utils.date_encoder import DateTimeEncoder
+from src.utils.datetime_encoder import DateTimeEncoder
 
 logger = get_logger(__name__)
 class UniswapSwapStreamer(EventStreamer):

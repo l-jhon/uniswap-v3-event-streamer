@@ -1,17 +1,20 @@
+import json
+import datetime
 from src import EventStreamer
 from eth_defi.event_reader.reorganisation_monitor import ReorganisationMonitor
 from eth_defi.provider.multi_provider import MultiProviderWeb3
-from eth_defi.event_reader.reader import read_events
 from eth_defi.event_reader.filter import Filter
 from eth_defi.uniswap_v3.deployment import fetch_deployment
 from eth_defi.uniswap_v3.pool import fetch_pool_details
 from eth_defi.uniswap_v3.constants import UNISWAP_V3_DEPLOYMENTS
-from confluent_kafka import Producer
+from eth_defi.event_reader.logresult import LogResult
+from confluent_kafka import Producer, Consumer
 from typing import Optional
 from src.utils.logger import get_logger
+from eth_defi.uniswap_v3.events import decode_swap
+from src.utils.date_encoder import DateTimeEncoder
 
 logger = get_logger(__name__)
-
 class UniswapSwapStreamer(EventStreamer):
     """Uniswap swap events streamer
 
@@ -24,11 +27,12 @@ class UniswapSwapStreamer(EventStreamer):
                  reorg_monitor: ReorganisationMonitor, 
                  pool_address: str, 
                  sleep: float,
+                 kafka_topic: str,
                  kafka_producer: Optional[Producer] = None,
+                 kafka_consumer: Optional[Consumer] = None,
                  block_state_path: Optional[str] = None,
                  initial_block_count: int = 10,
                  stats_save_interval: float = 10.0):
-        super().__init__(web3, reorg_monitor, sleep, block_state_path, initial_block_count, stats_save_interval)
         
         self.pool_address = pool_address
         self.pool_details = fetch_pool_details(web3, self.pool_address)
@@ -40,31 +44,71 @@ class UniswapSwapStreamer(EventStreamer):
             quoter_address=UNISWAP_V3_DEPLOYMENTS["ethereum"]["quoter"],
         )
         self.event_abi = self.pool_deployment.PoolContract.events.Swap
-        self.filter = Filter.create_filter(address=self.pool_address, event_types=[self.event_abi])
+        self.event_filter = Filter.create_filter(address=self.pool_address, event_types=[self.event_abi])
+
+        super().__init__(
+            web3=web3, 
+            reorg_monitor=reorg_monitor, 
+            sleep=sleep, 
+            event_filter=self.event_filter,
+            block_state_path=block_state_path, 
+            initial_block_count=initial_block_count, 
+            stats_save_interval=stats_save_interval
+        )
+        self.kafka_topic = kafka_topic
         self.kafka_producer = kafka_producer
-        
+        self.kafka_consumer = kafka_consumer
+    
         logger.info(f"UniswapSwapStreamer initialized for pool: {pool_address}")
-        
-    def fetch_events(self, start_block: int, end_block: int):
-        """Fetch events from the blockchain
+
+    def decode_event(self, event: LogResult) -> dict:
+        """Decode the event into a dictionary
 
         Args:
-            from_block (int): Starting block number
-            to_block (int): Ending block number
+            event (LogResult): The event to decode
         """
 
-        logger.info(f"Fetching events from block {start_block} to {end_block}")
+        decoded_event = decode_swap(event)
+        decoded_event["pool_details"] = str(self.pool_details)
+        decoded_event["pool_fee"] = self.pool_details.fee
+        decoded_event["token0_address"] = self.pool_details.token0.address
+        decoded_event["token1_address"] = self.pool_details.token1.address
+        decoded_event["token0_symbol"] = self.pool_details.token0.symbol
+        decoded_event["token1_symbol"] = self.pool_details.token1.symbol
+        decoded_event["token0_decimals"] = self.pool_details.token0.decimals
+        decoded_event["token1_decimals"] = self.pool_details.token1.decimals
+        decoded_event["token0_name"] = self.pool_details.token0.name
+        decoded_event["token1_name"] = self.pool_details.token1.name
+        decoded_event["token0_total_supply"] = self.pool_details.token0.total_supply 
+        decoded_event["token1_total_supply"] = self.pool_details.token1.total_supply
+        decoded_event["record_timestamp"] = datetime.datetime.now(datetime.timezone.utc)
 
-        events = read_events(
-            web3=self.web3, 
-            filter=self.filter, 
-            start_block=start_block, 
-            end_block=end_block,
-            extract_timestamps=None,
-            reorg_mon=self.reorg_monitor
-        )
+        return decoded_event
+
+    def event_producer(self):
+        """Produce events to the Kafka topic
+        """
+        if self.kafka_producer is None:
+            raise ValueError("Kafka producer is not set")
         
-        return events
+        for raw_event in self.stream_events():
+            decoded_event = self.decode_event(raw_event)
+            del raw_event['event']
+            raw_event['event_name'] = 'Swap'
+            raw_event['record_timestamp'] = datetime.datetime.now(datetime.timezone.utc)
+            self.kafka_producer.produce(
+                topic=self.kafka_topic,
+                value=json.dumps(
+                    {
+                        "raw_event": raw_event,
+                        "decoded_event": decoded_event
+                    },
+                    cls=DateTimeEncoder
+                )
+            )
+            self.kafka_producer.flush()
 
-        
-
+    def event_consumer(self):
+        """Consume events from the Kafka topic
+        """
+        pass

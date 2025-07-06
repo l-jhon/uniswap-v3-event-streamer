@@ -82,7 +82,18 @@ services:
     depends_on:
       - kafka
       - postgres
-    command: ["python", "main.py"]
+    command: ["python", "main.py", "--mode", "producer", "--event", "swap"]
+
+  events-consumer:
+    build:
+      context: ..
+      dockerfile: devops/Dockerfile
+    env_file:
+      - ../.env
+    container_name: events-consumer
+    depends_on:
+      - kafka
+    command: ["python", "main.py", "--mode", "consumer", "--event", "swap"]
 
 volumes:
   pgdata:

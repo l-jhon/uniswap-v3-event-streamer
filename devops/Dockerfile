@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12-slim
+FROM --platform=linux/amd64 python:3.12-slim
 
 ENV APP_DIR=/app \
     PYTHONUNBUFFERED=1 \
@@ -39,6 +39,8 @@ USER app
 
 # Activate the venv by default
 ENV PATH="/app/.venv/bin:$PATH"
+
+EXPOSE 8000
 
 # Final command
 CMD ["python", "main.py"]

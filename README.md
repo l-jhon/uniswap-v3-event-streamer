@@ -22,7 +22,7 @@
 
 The Uniswap V3 Event Streamer is designed to capture and process blockchain events in real-time. The project implements an event-driven architecture that can handle blockchain reorganizations and maintain state across restarts. Also there is a observability/monitoring stack that aims to show metrics about the pipeline.
 
-There is already a DB dump file with events. [Here is the file.](uniswap_v3_events.dump)
+There is already a DB dump file with some sample events. [Here is the file.](uniswap_v3_events.dump)
 
 ## ✨ Features
 

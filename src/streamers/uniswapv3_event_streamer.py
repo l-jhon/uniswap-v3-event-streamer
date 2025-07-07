@@ -136,7 +136,6 @@ class UniswapV3EventStreamer(EventStreamer):
             raise ValueError("Kafka producer is not set")
         
         for raw_event in self.stream_events():
-            logger.info(f"Event received: {raw_event['event'].event_name}")
             decoded_event = self.decode_event(raw_event)
             raw_event['event_name'] = raw_event['event'].event_name
             raw_event['record_timestamp'] = datetime.now(timezone.utc)
@@ -156,5 +155,6 @@ class UniswapV3EventStreamer(EventStreamer):
                     cls=DateTimeEncoder
                 )
             )
+            logger.info(f"Event received: {decoded_event['event_name']} - Pool: {decoded_event['token0_symbol']}/{decoded_event['token1_symbol']}")
             self.kafka_producer.flush()
 

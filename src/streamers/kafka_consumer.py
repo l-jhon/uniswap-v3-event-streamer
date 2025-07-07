@@ -105,7 +105,7 @@ class KafkaEventConsumer:
                         self.events_processed_counter.labels(event_name=decoded_event.get('event_name', 'unknown')).inc()
                         self.last_processed_timestamp.labels(event_name=decoded_event.get('event_name', 'unknown')).set(block_timestamp.timestamp())
                         self._handle_message(decoded_event)
-                        logger.info(f"Event {decoded_event.get('event_name', 'unknown')} processed successfully")
+                        logger.info(f"Event {decoded_event.get('event_name', 'unknown')} processed successfully - Pool: {decoded_event.get('token0_symbol', 'unknown')}/{decoded_event.get('token1_symbol', 'unknown')}")
                     else:
                         logger.error(f"Failed to decode event: {event_data}")
                         self.processing_errors_counter.labels(error_type='event_decode_error').inc()

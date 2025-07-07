@@ -13,6 +13,26 @@ from src.utils.kafka import setup_kafka
 
 logger = get_logger(__name__)
 
+def get_pool_addresses():
+    """Get pool addresses from environment variables.
+    
+    Returns:
+        list: List of pool addresses. Supports both single pool and comma-separated
+              multiple pools using POOL_ADDRESSES variable.
+    """
+    pool_addresses = os.getenv("POOL_ADDRESSES")
+    if not pool_addresses:
+        raise ValueError("Missing POOL_ADDRESSES environment variable")
+    
+    # Split by comma and strip whitespace
+    addresses = [addr.strip() for addr in pool_addresses.split(",") if addr.strip()]
+    
+    if not addresses:
+        raise ValueError("POOL_ADDRESSES is empty or contains no valid addresses")
+    
+    logger.info(f"Found {len(addresses)} pool address(es): {addresses}")
+    return addresses
+
 def run_mode(mode: str, event: str):
     """Run in producer or consumer mode."""
     logger.info(f"Running UniswapV3EventStreamer in {mode.upper()} mode for events: {event}...")
@@ -24,9 +44,7 @@ def run_mode(mode: str, event: str):
         if mode == "producer":
             start_http_server(8000)
             web3, api_request_counter = setup_web3()
-            pool = os.getenv("POOL_ADDR")
-            if not pool:
-                raise ValueError("Missing POOL_ADDR")
+            pool_addresses = get_pool_addresses()
 
             reorg_monitor = JSONRPCReorganisationMonitor(web3, check_depth=6)
             block_time = measure_block_time(web3)
@@ -37,7 +55,7 @@ def run_mode(mode: str, event: str):
                 web3=web3,
                 event_type=event,
                 reorg_monitor=reorg_monitor,
-                pool_address=[pool],
+                pool_address=pool_addresses,
                 sleep=block_time,
                 kafka_topic=kafka_topic,
                 kafka_producer=producer,

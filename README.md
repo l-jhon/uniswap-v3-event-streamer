@@ -176,8 +176,23 @@ For debugging and development, run supporting services in Docker but the applica
 ```bash
 # Application Configuration
 JSON_RPC_URL=https://rpc.test
-POOL_ADDR=address
+POOL_ADDRESSES=address               # Pool address(es) - single or comma-separated
 LOG_LEVEL=info
+```
+
+#### Pool Configuration Examples
+
+**Single Pool:**
+```bash
+POOL_ADDRESSES=0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640
+```
+
+**Multiple Pools:**
+```bash
+POOL_ADDRESSES=0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640,0x6c6Bc977E13Df9b0de53b251522280BB72383700,0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8
+```
+
+> **Note:** The script automatically detects if you're using a single pool or multiple pools based on the presence of commas.
 
 # PostgreSQL Configuration
 POSTGRES_HOST=localhost

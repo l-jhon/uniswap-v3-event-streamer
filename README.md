@@ -122,7 +122,7 @@ graph LR
 
 > **Note**: For local development, you'll need Python and UV. For Docker deployment, only Docker and Docker-Compose are required.
 
-### 🐳 Docker Deployment (Recommended)
+### 🐳 Docker Deployment
 
 1. **Clone and Configure**
    ```bash

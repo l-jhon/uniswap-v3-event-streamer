@@ -1,0 +1,413 @@
+{
+  "title": "Kafka Metrics",
+  "timezone": "browser",
+  "refresh": "10s",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Events Produced/min",
+      "id": 3,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(produced_events_total[1m])) * 60",
+          "legendFormat": "Total Events/min"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0}
+    },
+    {
+      "type": "stat",
+      "title": "Events Consumed/min",
+      "id": 4,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(events_processed_total[1m])) * 60",
+          "legendFormat": "Total Events/min"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 0}
+    },
+    {
+      "type": "stat",
+      "title": "Total Events Produced",
+      "id": 6,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(produced_events_total)",
+          "legendFormat": "Total Events"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Total Events Consumed",
+      "id": 12,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(events_processed_total)",
+          "legendFormat": "Total Events"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 4},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+
+    {
+      "type": "stat",
+      "title": "Event Age (seconds)",
+      "id": 11,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "avg(events_processed_latency)",
+          "legendFormat": "Avg Age (sec)"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Chain Reorganizations",
+      "id": 7,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "chain_reorganizations_total",
+          "legendFormat": "Total Reorgs"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 4}
+    },
+
+    {
+      "type": "stat",
+      "title": "API Requests Total",
+      "id": 9,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "api_requests_total",
+          "legendFormat": "Total Requests"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Consumer Group Members",
+      "id": 19,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "kafka_consumergroup_members",
+          "legendFormat": "{{consumergroup}}"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Under Replicated Partitions",
+      "id": 20,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(kafka_topic_partition_under_replicated_partition)",
+          "legendFormat": "Total Under Replicated"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": 0},
+              {"color": "red", "value": 1}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Topic Partitions",
+      "id": 21,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "kafka_topic_partitions",
+          "legendFormat": "{{topic}}"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 12},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Processing Error Rate",
+      "id": 28,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(processing_errors_total[1m])",
+          "legendFormat": "Errors/min"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 12},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": 0},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 1}
+            ]
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Kafka Brokers",
+      "id": 24,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "kafka_brokers",
+          "legendFormat": "Total Brokers"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 12},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+
+    {
+      "type": "graph",
+      "title": "Lag by Consumer Group",
+      "id": 13,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "kafka_consumergroup_lag",
+          "legendFormat": "{{consumergroup}} - {{topic}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+    },
+    {
+      "type": "graph",
+      "title": "Events Produced by Type",
+      "id": 14,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(produced_events_total[1m])",
+          "legendFormat": "{{event_name}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+    },
+    {
+      "type": "graph",
+      "title": "Events Consumed by Type",
+      "id": 15,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(events_processed_total[1m])",
+          "legendFormat": "{{event_name}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+    },
+
+    {
+      "type": "graph",
+      "title": "API Request Rate",
+      "id": 17,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(api_requests_total[1m])",
+          "legendFormat": "{{chain_id}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
+    },
+    {
+      "type": "graph",
+      "title": "Last Event Processed Timestamp",
+      "id": 18,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "last_event_processed_timestamp",
+          "legendFormat": "{{event_name}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTime"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Memory Usage (Kafka Exporter)",
+      "id": 25,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "go_memstats_heap_alloc_bytes",
+          "legendFormat": "Heap Allocated"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 48},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.7e9},
+              {"color": "red", "value": 0.9e9}
+            ]
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Network Receive Rate (Kafka Exporter)",
+      "id": 26,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(process_network_receive_bytes_total[1m])",
+          "legendFormat": "Receive Rate"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 48},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Network Transmit Rate (Kafka Exporter)",
+      "id": 27,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(process_network_transmit_bytes_total[1m])",
+          "legendFormat": "Transmit Rate"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 48},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "auto"
+          }
+        }
+      }
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  }
+}

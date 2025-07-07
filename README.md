@@ -196,6 +196,7 @@ POOL_ADDRESSES=0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640,0x6c6Bc977E13Df9b0de53
 
 > **Note:** The script automatically detects if you're using a single pool or multiple pools based on the presence of commas.
 
+```bash
 # PostgreSQL Configuration
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
@@ -209,6 +210,7 @@ GRAFANA_ADMIN_PASSWORD=admin
 
 # Kafka Configuration
 KAFKA_BOOTSTRAP_SERVER=localhost:29092
+```
 
 ### Supported Event Types
 

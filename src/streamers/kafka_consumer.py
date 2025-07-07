@@ -48,6 +48,12 @@ class KafkaEventConsumer:
             labelnames=['event_name']
         )
 
+        self.processing_errors_counter = Counter(
+            name='processing_errors_total',
+            documentation='Total number of processing errors since startup',
+            labelnames=['error_type']
+        )
+
         logger.info(f"KafkaEventConsumer initialized for topic: {self.kafka_topic}")
     
     def _handle_message(self, event_data: dict):
@@ -84,6 +90,7 @@ class KafkaEventConsumer:
                 
                 if msg.error():
                     logger.error(f"Consumer error: {msg.error()}")
+                    self.processing_errors_counter.labels(error_type='kafka_consumer_error').inc()
                     continue
                 
                 try:
@@ -101,11 +108,14 @@ class KafkaEventConsumer:
                         logger.info(f"Event {decoded_event.get('event_name', 'unknown')} processed successfully")
                     else:
                         logger.error(f"Failed to decode event: {event_data}")
+                        self.processing_errors_counter.labels(error_type='event_decode_error').inc()
                     
                 except json.JSONDecodeError as e:
                     logger.error(f"Failed to decode message: {e}")
+                    self.processing_errors_counter.labels(error_type='json_decode_error').inc()
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
+                    self.processing_errors_counter.labels(error_type='processing_error').inc()
                     
         except KeyboardInterrupt:
             logger.info("Consumer interrupted, shutting down...")

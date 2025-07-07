@@ -391,6 +391,45 @@ docker logs -f events-consumer
 make compose-down
 ```
 
+## Alternatives
+
+There are some alternatives to traditional RPC calls for building event-driven blockchain architectures:
+
+### 1. HyperSync
+
+An ultra-fast API for blockchain data retrieval that delivers transformative performance improvements.
+
+#### Performance Benchmarks
+
+| Task | Traditional RPC | HyperSync | Improvement |
+|------|----------------|-----------|-------------|
+| Scan Arbitrum blockchain for sparse log data | Hours/Days | 2 seconds | ~2000x faster |
+| Fetch all Uniswap v3 PoolCreated events | Hours | Seconds | ~500x faster |
+
+#### Use Cases
+- **Indexers**: Build high-performance data indexers with minimal infrastructure
+- **Data Analytics**: Perform complex on-chain analysis in seconds instead of days
+- **Block Explorers**: Create responsive explorers with comprehensive data access
+- **Monitoring Tools**: Track blockchain activity with near real-time updates
+- **Cross-chain Applications**: Access unified data across multiple networks
+- **ETL Pipelines**: Create pipelines to extract and save data fast
+
+📖 [HyperSync Documentation](https://docs.envio.dev/docs/HyperSync/overview)
+
+### 2. Shovel
+
+An open-source tool for synchronizing Ethereum data to PostgreSQL databases.
+
+#### Features
+- **Multi-chain Support**: Ethereum, Base, Optimism, Arbitrum, and other EVM chains
+- **Flexible Connections**: Connect to hosted nodes (Alchemy, Quicknode) or local nodes (Geth, Reth)
+- **Event Decoding**: Decode and save events to PostgreSQL without custom functions
+- **Comprehensive Indexing**: Index transactions and block metadata
+- **Real-time Sync**: Stay in sync with the latest blocks across many chains
+- **Concurrent Backfilling**: Efficiently backfill historical data
+
+📖 [Shovel Documentation](https://indexsupply.com/shovel/)
+
 ## 🔗 Related Projects
 
 - [eth-defi](https://github.com/tradingstrategy-ai/web3-ethereum-defi) - Ethereum DeFi utilities

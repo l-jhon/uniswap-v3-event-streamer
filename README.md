@@ -120,7 +120,7 @@ graph LR
 - **Docker & Docker Compose** - [Installation Guide](https://docs.docker.com/get-docker/)
 - **UV (Dependency Management)** - [Installation](https://docs.astral.sh/uv/getting-started/installation/)
 
-> **Note**: For local development, you'll need Python and UV. For Docker deployment, only Docker is required.
+> **Note**: For local development, you'll need Python and UV. For Docker deployment, only Docker and Docker-Compose are required.
 
 ### 🐳 Docker Deployment (Recommended)
 

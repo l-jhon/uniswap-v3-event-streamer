@@ -83,7 +83,7 @@ GRAFANA_ADMIN_PASSWORD=admin
 KAFKA_BOOTSTRAP_SERVER=localhost:29092
 ```
 
-### Usage
+### How to execute this Project?
 
 This project it was implemented to run using docker containers, and for that it was used `docker-compose`. 
 When running the project locally you have two different modes to run it. The first one is entire using `docker-compose` and 
@@ -115,6 +115,67 @@ Each event includes comprehensive metadata:
 - Transaction details (block number, timestamp)
 - Decoded event parameters
 - Event type identification
+
+The project preserves both raw blockchain data and decoded event information. Here's an example of a Swap event as it appears in Kafka:
+
+```json
+{
+	"raw_event": {
+		"address": "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+		"topics": [
+			"0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+			"0x00000000000000000000000066a9893cc07d91d95644aedd05d03f95e1dba8af",
+			"0x00000000000000000000000066a9893cc07d91d95644aedd05d03f95e1dba8af"
+		],
+		"data": "0x000000000000000000000000000000000000000000000000000000001ee73afffffffffffffffffffffffffffffffffffffffffffffffffffd37dccd4dbd41c70000000000000000000000000000000000004cd36e4371ad3f5ee7344240f2b000000000000000000000000000000000000000000000000025e5d6f904d115550000000000000000000000000000000000000000000000000000000000030470",
+		"blockHash": "0x7fc2c0514b58bb05985bfe462f2df53668f4b712f7eeab1cc5b33caaff9ab450",
+		"blockNumber": 22864697,
+		"blockTimestamp": "0x686b41e3",
+		"transactionHash": "0x42c49b167fff2b97d1cd0f8af50111e27fafa88bac3104142c7eb411e703e152",
+		"transactionIndex": "0x18",
+		"logIndex": "0xc2",
+		"removed": false,
+		"context": null,
+		"chunk_id": 22864697,
+		"timestamp": 1751859683,
+		"event_name": "Swap",
+		"record_timestamp": "2025-07-07T03:42:52"
+	},
+	"decoded_event": {
+		"block_number": 22864697,
+		"timestamp": "2025-07-07T03:41:23",
+		"tx_hash": "0x42c49b167fff2b97d1cd0f8af50111e27fafa88bac3104142c7eb411e703e152",
+		"log_index": 194,
+		"pool_contract_address": "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+		"amount0": 518470399,
+		"amount1": -200448884064042553,
+		"sqrt_price_x96": 1558214397053970255220248800195248,
+		"liquidity": 2730825114086085973,
+		"tick": 197744,
+		"event_name": "Swap",
+		"pool_details": "Pool 0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640 is USDC-WETH, with the fee 0.0500%",
+		"pool_fee": 0.0005,
+		"token0_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+		"token1_address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+		"token0_symbol": "USDC",
+		"token1_symbol": "WETH",
+		"token0_decimals": 6,
+		"token1_decimals": 18,
+		"token0_name": "USD Coin",
+		"token1_name": "Wrapped Ether",
+		"token0_total_supply": 41372662655014001,
+		"token1_total_supply": 2632330049017048166323257,
+		"record_timestamp": "2025-07-07T03:42:52"
+	}
+}
+```
+
+The idea to keep also the raw data is for possible uses cases where we want to use a different decode or execute a backfill process.
+
+**Key Features of the Event Structure:**
+- **Raw Event**: Preserves the original blockchain log data including topics, data field, and transaction metadata
+- **Decoded Event**: Human-readable event data with decoded parameters, token information, and pool details
+- **Comprehensive Metadata**: Includes both technical blockchain data and business-relevant information like token symbols, pool fees, and liquidity details
 
 #### 🐳 Docker Deployment
 
@@ -271,6 +332,11 @@ The project includes Grafana dashboards for comprehensive monitoring:
   - Kafka consumer group health
   - Topic partition status
 
+<video width="100%" controls onloadedmetadata="this.playbackRate = 2.0;">
+  <source src="docs/grafana.mp4" type="video/mp4">
+</video>
+
+
 ### Kafka UI
 
 A web-based interface for Kafka cluster management and monitoring:
@@ -280,6 +346,10 @@ A web-based interface for Kafka cluster management and monitoring:
 - **Message Browsing**: Browse messages in topics
 - **Cluster Health**: Monitor broker status and configuration
 - **Real-time Metrics**: View Kafka cluster performance metrics
+
+<video width="100%" controls onloadedmetadata="this.playbackRate = 2.0;">
+  <source src="docs/kafka_ui.mp4" type="video/mp4">
+</video>
 
 ## 🔧 Development
 

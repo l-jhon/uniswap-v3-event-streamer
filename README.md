@@ -76,20 +76,19 @@ graph LR
 The Reorgs are handle by the framework `eth-defi` used to stream the events. Here is how the framework is handling with reorgs.
 
 ```mermaid
-graph TD
-    A[Start Block Streaming] --> B[Fetch Latest Block]
-    B --> C[Compare with Checkpoint Block]
-    C -->|Same Block Hash| D[Continue Streaming Events]
-    C -->|Different Hash| E[Reorg Detected!]
-    E --> F[Emit Reorg Event]
-    F --> G[Rollback to Last Safe Block]
-    G --> H[Refetch Blocks After Rollback]
-    H --> D
-    D --> I[Checkpoint Current Block]
-    I --> B
+graph LR
+    A[Start] --> B[Fetch Block]
+    B --> C{Check Hash}
+    C -->|Same| D[Stream Events]
+    C -->|Different| E[Reorg!]
+    E --> F[Rollback & Refetch]
+    F --> D
+    D --> G[Checkpoint]
+    G --> B
 
-    style E fill:#fdd,stroke:#f00,stroke-width:2px
-    style F fill:#fee,stroke:#f00,stroke-dasharray: 5 5
+    style A fill:#e1f5fe,stroke:#01579b
+    style E fill:#ffebee,stroke:#c62828
+    style F fill:#fff3e0,stroke:#ef6c00
 ```
 
 ## 🛠️ Implementation Details

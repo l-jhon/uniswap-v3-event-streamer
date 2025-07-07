@@ -62,11 +62,7 @@ class EventStreamer(ABC):
             documentation='Total number of blockchain chain reorganizations (forks) detected since startup',
             labelnames=['chain_id']
         )
-        self.block_headers_buffered_gauge = Gauge(
-            name='block_headers_buffered',
-            documentation='Current number of block headers buffered in memory for reorg detection',
-            labelnames=['chain_id']
-        )
+
         self.api_requests_total_gauge = Gauge(
             name='api_requests_total',
             documentation='Total number of JSON-RPC API requests made to the blockchain node',
@@ -172,8 +168,6 @@ class EventStreamer(ABC):
 
                 if time.time() > self.next_stats_save:
                     self._save_block_state()
-                    
-                    self.block_headers_buffered_gauge.labels(chain_id=self.chain_id).set(len(self.reorg_monitor.block_map))
                     
                     if self.api_request_counter:
                         api_requests_total = self.api_request_counter['total']

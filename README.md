@@ -54,13 +54,13 @@ The Uniswap V3 Event Streamer is designed to capture and process blockchain even
 
 ```mermaid
 graph LR
-    A[Blockchain] -->|Events| B[Event Producer]
-    B -->|Kafka| C[Message Queue]
-    C -->|Consume| D[Event Consumer]
-    D -->|Store| E[PostgreSQL]
-    B -.->|Metrics| F[Prometheus]
-    D -.->|Metrics| F
-    F -->|Visualize| G[Grafana]
+    A[Blockchain] -->|Swap / Mint / Burn Events| B[Event Producer]
+    B -->|Produce to Kafka Topic| C[Kafka Message Queue]
+    C -->|Consume from Topic| D[Event Consumer]
+    D -->|Decode + Store| E[PostgreSQL]
+    B -.->|Metrics: latency, count| F[Prometheus]
+    D -.->|Metrics: latency, processed| F
+    F -->|Dashboards| G[Grafana]
 ```
 
 ![Data Architecture](docs/data_architecture.png)

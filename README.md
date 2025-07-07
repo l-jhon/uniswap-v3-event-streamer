@@ -333,7 +333,7 @@ The project includes Grafana dashboards for comprehensive monitoring:
   - Topic partition status
 
 <video width="100%" controls onloadedmetadata="this.playbackRate = 2.0;">
-  <source src="docs/grafana.mp4" type="video/mp4">
+  <source src="https://github.com/l-jhon/0x-uniswap-event-streamer/blob/37d09383137dbfa9b57f89ceaa919d40530e2182/docs/grafana.mp4" type="video/mp4">
   Tag.
 </video>
 
@@ -349,7 +349,7 @@ A web-based interface for Kafka cluster management and monitoring:
 - **Real-time Metrics**: View Kafka cluster performance metrics
 
 <video width="100%" controls onloadedmetadata="this.playbackRate = 2.0;">
-  <source src="docs/kafka_ui.mp4" type="video/mp4">
+  <source src="https://github.com/l-jhon/0x-uniswap-event-streamer/blob/37d09383137dbfa9b57f89ceaa919d40530e2182/docs/kafka_ui.mp4" type="video/mp4">
   Tag.
 </video>
 

@@ -295,7 +295,7 @@ The idea to keep also the raw data is for possible uses cases where we want to u
 ### 🎬 Demo Videos
 
 #### Grafana Dashboard
-https://github.com/user-attachments/assets/cd7aee58-3325-4f74-80f0-1b964ad855ab
+https://github.com/user-attachments/assets/71fb0000-8cf9-47e9-98b7-90cd926a0235
 
 #### Kafka UI
 https://github.com/user-attachments/assets/44d69ec6-a4a2-4881-a076-802d130f3d41

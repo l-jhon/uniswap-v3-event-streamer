@@ -171,6 +171,33 @@ For debugging and development, run supporting services in Docker but the applica
    python main.py --mode consumer
    ```
 
+## 🛠️ Makefile Commands
+
+The project includes a Makefile with convenient commands for managing the application:
+
+### Basic Operations
+```bash
+make build                # Build Docker image
+make compose-up           # Start all services with docker-compose
+make compose-down         # Stop all services
+make compose-logs         # Show logs from all services
+```
+
+### Development Commands
+```bash
+make compose-up-services  # Start infrastructure only (no producer/consumer)
+make compose-rebuild      # Start services with force rebuild
+```
+
+### Maintenance Commands
+```bash
+make reset-consumer-offset # Reset Kafka consumer group offset
+make clean-up             # Complete cleanup (stop, remove volumes, delete image)
+make help                 # Show all available commands
+```
+
+> **Tip:** Use `make help` to see all available commands with descriptions.
+
 ## ⚙️ Configuration
 
 ### Environment Variables

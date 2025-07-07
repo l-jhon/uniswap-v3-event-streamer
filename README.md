@@ -20,7 +20,7 @@
 
 ## 🎯 Overview
 
-The Uniswap V3 Event Streamer is designed to capture and process blockchain events in real-time. The project implements an event-driven architecture that can handle blockchain reorganizations and maintain state across restarts. Also there is a observability/monitoring stack that aims to show metrics about the pipeline.
+The Uniswap V3 Event Streamer is designed to capture and process blockchain events in real-time from one or multiple Uniswap V3 pools. The project implements an event-driven architecture that can handle blockchain reorganizations and maintain state across restarts. Also there is a observability/monitoring stack that aims to show metrics about the pipeline.
 
 There is already a DB dump file with some sample events. [Here is the file.](uniswap_v3_events.dump)
 
@@ -32,6 +32,7 @@ There is already a DB dump file with some sample events. [Here is the file.](uni
 
 ### 🚀 Core Capabilities
 - **Real-time Event Streaming** - Continuously monitors Uniswap V3 pools
+- **Multi-Pool Support** - Stream events from single or multiple pools simultaneously
 - **Fault Tolerance** - Automatic recovery with checkpoint-based state management
 - **Blockchain Reorg Handling** - Robust handling of Ethereum chain reorganizations
 - **Scalable Architecture** - Producer/Consumer pattern with Kafka
@@ -208,7 +209,6 @@ GRAFANA_ADMIN_PASSWORD=admin
 
 # Kafka Configuration
 KAFKA_BOOTSTRAP_SERVER=localhost:29092
-```
 
 ### Supported Event Types
 

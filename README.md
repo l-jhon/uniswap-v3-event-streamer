@@ -334,6 +334,7 @@ The project includes Grafana dashboards for comprehensive monitoring:
 
 <video width="100%" controls onloadedmetadata="this.playbackRate = 2.0;">
   <source src="docs/grafana.mp4" type="video/mp4">
+  Tag.
 </video>
 
 
@@ -349,6 +350,7 @@ A web-based interface for Kafka cluster management and monitoring:
 
 <video width="100%" controls onloadedmetadata="this.playbackRate = 2.0;">
   <source src="docs/kafka_ui.mp4" type="video/mp4">
+  Tag.
 </video>
 
 ## 🔧 Development

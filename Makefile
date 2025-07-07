@@ -6,6 +6,10 @@ build:
 compose-up:
 	docker-compose --env-file .env -f devops/docker-compose.yaml up -d
 
+.PHONY: compose-up-services
+compose-up-services:
+	docker-compose --env-file .env -f devops/docker-compose.yaml up -d --scale events-producer=0 --scale events-consumer=0
+
 .PHONY: compose-rebuild
 compose-rebuild:
 	docker-compose --env-file .env -f devops/docker-compose.yaml up -d --build
@@ -36,6 +40,7 @@ help:
 	@echo "Available commands:"
 	@echo "  build                - Build Docker image"
 	@echo "  compose-up           - Start services with docker-compose"
+	@echo "  compose-up-services - Start infrastructure services only (excludes events-producer and events-consumer)"
 	@echo "  compose-rebuild      - Start services with docker-compose (force rebuild)"
 	@echo "  compose-down         - Stop services with docker-compose"
 	@echo "  compose-logs         - Show logs from docker-compose services"

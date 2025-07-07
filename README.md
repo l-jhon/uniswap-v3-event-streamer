@@ -63,6 +63,8 @@ graph LR
     F -->|Visualize| G[Grafana]
 ```
 
+![Data Architecture](docs/data_architecture.png)
+
 ### Core Components
 
 | Component | Description |

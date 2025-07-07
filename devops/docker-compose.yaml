@@ -34,6 +34,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -46,6 +51,19 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    command:
+      - '--kafka.server=kafka:9092'
+      - '--web.listen-address=:9308'
+      - '--web.telemetry-path=/metrics'
+    ports:
+      - "9308:9308"
+    restart: on-failure
+    depends_on:
+      - kafka
 
   prometheus:
     image: prom/prometheus:latest
@@ -65,6 +83,10 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - ./grafana-dashboards/dashboards:/etc/grafana/provisioning/dashboards/dashboards
+      - ./grafana-dashboards/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana-dashboards/provisioning/providers.yml:/etc/grafana/provisioning/dashboards/providers.yml
 
   events-producer:
     build:
@@ -82,7 +104,7 @@ services:
     depends_on:
       - kafka
       - postgres
-    command: ["python", "main.py", "--mode", "producer", "--event", "swap"]
+    command: ["python", "main.py", "--mode", "producer", "--event", "all"]
 
   events-consumer:
     build:
@@ -90,10 +112,13 @@ services:
       dockerfile: devops/Dockerfile
     env_file:
       - ../.env
+    environment:
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - POSTGRES_HOST=postgres
     container_name: events-consumer
     depends_on:
       - kafka
-    command: ["python", "main.py", "--mode", "consumer", "--event", "swap"]
+    command: ["python", "main.py", "--mode", "consumer"]
 
 volumes:
   pgdata:

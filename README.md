@@ -432,6 +432,12 @@ An open-source tool for synchronizing Ethereum data to PostgreSQL databases.
 
 📖 [Shovel Documentation](https://indexsupply.com/shovel/)
 
+## 📋 TODO
+
+- [ ] **Improve Unit Tests** - Enhance test coverage and add more comprehensive test cases
+- [ ] **Implement Data Quality Checks** - Add validation and monitoring for data integrity
+- [ ] **Multiple Pools** - Support streaming events from multiple Uniswap V3 pools simultaneously
+
 ## 🔗 Related Projects
 
 - [eth-defi](https://github.com/tradingstrategy-ai/web3-ethereum-defi) - Ethereum DeFi utilities
@@ -439,11 +445,3 @@ An open-source tool for synchronizing Ethereum data to PostgreSQL databases.
 - [web3.py](https://github.com/ethereum/web3.py) - Ethereum Python library
 
 ---
-
-<div align="center">
-
-**Built with ❤️ for the DeFi community**
-
-[Report Bug](https://github.com/yourusername/repo/issues) • [Request Feature](https://github.com/yourusername/repo/issues)
-
-</div>

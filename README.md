@@ -332,7 +332,7 @@ The project includes Grafana dashboards for comprehensive monitoring:
   - Kafka consumer group health
   - Topic partition status
 
-<video src="https://github.com/l-jhon/0x-uniswap-event-streamer/blob/37d09383137dbfa9b57f89ceaa919d40530e2182/docs/grafana.mp4"controls width="600"></video>  
+https://github.com/user-attachments/assets/cd7aee58-3325-4f74-80f0-1b964ad855ab
 
 
 ### Kafka UI
@@ -345,7 +345,8 @@ A web-based interface for Kafka cluster management and monitoring:
 - **Cluster Health**: Monitor broker status and configuration
 - **Real-time Metrics**: View Kafka cluster performance metrics
 
-<video src="https://github.com/l-jhon/0x-uniswap-event-streamer/blob/37d09383137dbfa9b57f89ceaa919d40530e2182/docs/kafka_ui.mp4" controls width="600"></video>
+https://github.com/user-attachments/assets/44d69ec6-a4a2-4881-a076-802d130f3d41
+
 
 ## 🔧 Development
 

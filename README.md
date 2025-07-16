@@ -486,10 +486,4 @@ An open-source tool for synchronizing Ethereum data to PostgreSQL databases.
 - [ ] **Cloud Deployment** - Deploy this project on a cloud provider (e.g., AWS)
 - [ ] **Infrastructure as Code** - Implement Terraform scripts to deploy it on cloud
 
-## 🔗 Related Projects
-
-- [eth-defi](https://github.com/tradingstrategy-ai/web3-ethereum-defi) - Ethereum DeFi utilities
-- [confluent-kafka-python](https://github.com/confluentinc/confluent-kafka-python) - Kafka client
-- [web3.py](https://github.com/ethereum/web3.py) - Ethereum Python library
-
 ---

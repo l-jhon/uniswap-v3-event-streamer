@@ -481,7 +481,7 @@ An open-source tool for synchronizing Ethereum data to PostgreSQL databases.
 
 - [ ] **Improve Unit Tests** - Enhance test coverage and add more comprehensive test cases
 - [ ] **Implement Data Quality Checks** - Add validation and monitoring for data integrity
-- [ ] **Multiple Pools** - Support streaming events from multiple Uniswap V3 pools simultaneously
+- [x] **Multiple Pools** - Support streaming events from multiple Uniswap V3 pools simultaneously
 - [ ] **Design Production Architecture** - Design a production-ready go-to architecture
 - [ ] **Cloud Deployment** - Deploy this project on a cloud provider (e.g., AWS)
 - [ ] **Infrastructure as Code** - Implement Terraform scripts to deploy it on cloud

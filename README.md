@@ -4,7 +4,6 @@
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Docker](https://img.shields.io/badge/docker-required-blue.svg)](https://www.docker.com/)
-[![Status](https://img.shields.io/badge/status-production%20ready-green.svg)]()
 [![Kafka](https://img.shields.io/badge/kafka-enabled-orange.svg)](https://kafka.apache.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-13+-blue.svg)](https://www.postgresql.org/)
 [![Prometheus](https://img.shields.io/badge/prometheus-monitoring-red.svg)](https://prometheus.io/)

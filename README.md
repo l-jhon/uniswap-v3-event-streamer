@@ -485,4 +485,7 @@ An open-source tool for synchronizing Ethereum data to PostgreSQL databases.
 - [ ] **Cloud Deployment** - Deploy this project on a cloud provider (e.g., AWS)
 - [ ] **Infrastructure as Code** - Implement Terraform scripts to deploy it on cloud
 
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
 ---
